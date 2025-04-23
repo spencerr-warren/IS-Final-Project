@@ -40,3 +40,24 @@ footer {
     background-color: #0073e6;
     color: white;
 }
+
+.dogvid {
+    margin-bottom: 20px;
+    padding: 15px;
+    background-color: white;
+    border-radius: 5px;
+}
+
+.zeke {
+    margin-bottom: 20px;
+    padding: 15px;
+    background-color: white;
+    border-radius: 5px;
+}
+
+.doggraph {
+    margin-bottom: 20px;
+    padding: 15px;
+    background-color: white;
+    border-radius: 5px;
+}
