@@ -1,0 +1,113 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Minesweeper</title>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css">
+    <style>
+        body { background-color: #f8f9fa; text-align: center; padding: 20px; }
+        .board { display: grid; grid-template-columns: repeat(8, 40px); gap: 5px; justify-content: center; margin-top: 20px; }
+        .cell { width: 40px; height: 40px; font-size: 18px; display: flex; align-items: center; justify-content: center;
+            border: 1px solid #ccc; cursor: pointer; background-color: #e9ecef; }
+        .cell.revealed { background-color: #fff; cursor: default; }
+        .cell.mine { background-color: #dc3545; color: #fff; }
+        .cell.flagged { background-color: #ffc107; cursor: default; }
+        .instructions { background-color: #fff; padding: 15px; border-radius: 8px; max-width: 500px; margin: auto; text-align: left; }
+    </style>
+</head>
+<body>
+
+    <nav id="top">
+        <br>
+        <a href="index.html">Home</a> |
+        <a href="#">Game</a> |
+        <a href="scratch.html">Animals</a> <br> <br>
+    </nav>
+
+    <h1 class="mt-4">Minesweeper</h1>
+    <div class="instructions shadow-sm">
+        <h4>How to Play:</h4>
+        <ul>
+            <li>Click a cell to reveal its contents.</li>
+            <li>If a number appears, it represents the number of adjacent mines.</li>
+            <li>If you hit a mine 💣, the game is over.</li>
+            <li><strong>Right-click</strong> (or <strong>Shift + Click</strong>) to place/remove a flag 🚩 marking suspected mines.</li>
+            <li>Clear all non-mine cells to win!</li>
+        </ul>
+    </div>
+    <div id="board" class="board"></div>
+    <button onclick="initGame()" class="btn btn-primary mt-3">Restart Game</button>
+
+    <script>
+        const size = 8, mines = 10;
+        let board = [], minePositions = new Set();
+
+        function initGame() {
+            document.getElementById("board").innerHTML = "";
+            board = Array.from({ length: size * size }, () => ({ mine: false, revealed: false, flagged: false, count: 0 }));
+            minePositions.clear();
+
+            while (minePositions.size < mines) {
+                minePositions.add(Math.floor(Math.random() * size * size));
+            }
+
+            minePositions.forEach(pos => board[pos].mine = true);
+
+            for (let i = 0; i < size * size; i++) {
+                let cell = document.createElement("div");
+                cell.className = "cell";
+                cell.dataset.index = i;
+                cell.onclick = (event) => {
+                    if (event.shiftKey) {
+                        toggleFlag(i);
+                    } else {
+                        revealCell(i);
+                    }
+                };
+                cell.oncontextmenu = (e) => { 
+                    e.preventDefault(); 
+                    toggleFlag(i);
+                };
+                document.getElementById("board").appendChild(cell);
+            }
+        }
+
+        function revealCell(index) {
+            if (board[index].revealed || board[index].flagged) return;
+            board[index].revealed = true;
+            let cell = document.querySelector(`.cell[data-index='${index}']`);
+
+            if (board[index].mine) {
+                cell.classList.add("mine");
+                cell.innerHTML = "💣";
+                setTimeout(() => alert("Game Over!"), 100);
+            } else {
+                let count = getMineCount(index);
+                board[index].count = count;
+                cell.classList.add("revealed");
+                cell.innerHTML = count > 0 ? count : "";
+            }
+        }
+
+        function toggleFlag(index) {
+            if (board[index].revealed) return;
+            board[index].flagged = !board[index].flagged;
+            let cell = document.querySelector(`.cell[data-index='${index}']`);
+            cell.classList.toggle("flagged");
+            cell.innerHTML = board[index].flagged ? "🚩" : "";
+        }
+
+        function getMineCount(index) {
+            let x = index % size, y = Math.floor(index / size);
+            let offsets = [-1, 0, 1].flatMap(dx => [-1, 0, 1].map(dy => [dx, dy]));
+            return offsets.reduce((sum, [dx, dy]) => {
+                let nx = x + dx, ny = y + dy, ni = ny * size + nx;
+                return sum + (nx >= 0 && ny >= 0 && nx < size && ny < size && board[ni].mine ? 1 : 0);
+            }, 0);
+        }
+
+        initGame();
+    </script>
+</body>
+</html>
